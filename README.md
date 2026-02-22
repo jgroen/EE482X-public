@@ -42,8 +42,7 @@ These scripts contain **clearly marked sections** for implementing new functions
 6. Implement additional visualization functions in `analyze_iq.py` or `analyze_external_iq.py` (e.g., FFT, spectrogram, histograms) as instructed in the lab.
 
 7. Submit the following:
-   - `capture_iq.bin`
-   - Modified Python scripts (`analyze_iq.py`, `analyze_external_iq.py`)
+   - Link to your Github repo with all modified python scripts and captures
    - All plots labeled by deliverable letter
    - Written answers to all lab questions
 
