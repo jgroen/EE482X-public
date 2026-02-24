@@ -27,11 +27,11 @@ def capture_iq(center_freq, sample_rate, gain, duration, output_file, sdr_type):
     """
     print(f"Capturing {duration}s of IQ data at {center_freq/1e6} MHz...")
     # Example placeholder: generate random complex samples
-    num_samples = int(sample_rate * duration)
-    iq_data = (np.random.randn(num_samples) + 1j*np.random.randn(num_samples)).astype(np.complex64)
+        # iq_data = get_samples
     
     # Save to file
     iq_data.tofile(output_file)
+    num_samples = int(sample_rate * duration)
     print(f"Saved {num_samples} samples to {output_file}")
 
 if __name__ == "__main__":
