@@ -1,67 +1,104 @@
 """
-analyze_iq.py
+analyze_iq.py - Student Version
 
 Replay and visualize your recorded IQ data.
 
 Instructions:
-- Load 'capture_iq.bin'.
-- Implement plotting functions below.
+- Fill in the parameters at the top.
+- Implement missing code for the time-domain and FFT plots.
+- Spectrogram is provided fully working.
 """
 
 import numpy as np
 import matplotlib.pyplot as plt
 
-INPUT_FILE =  # file name
-FS =   # sample rate in Hz
-DTYPE = # data type
+# ===== Parameters (fill these in) =====
+INPUT_FILE = ''       # e.g., 'lab2_iq.bin'
+FS = 0                # sample rate in Hz
+CENTER_FREQ = 0       # SDR center frequency in Hz
+IQ_DTYPE = None       # Data type of IQ samples in the file, e.g., np.complex64
 
 # ===== Load IQ data =====
-iq_data = np.fromfile(INPUT_FILE, dtype=DTYPE)
+iq_data = np.fromfile(INPUT_FILE, dtype=IQ_DTYPE)
+print(f"Loaded {len(iq_data)} complex samples from {INPUT_FILE} (dtype={IQ_DTYPE})")
 
-# ===== Implement visualization functions =====
+# ===== Visualization functions =====
 
-def plot_time_domain(iq):
+def plot_time_domain(iq, num_samples=10000):
     """
     Plot I and Q components over time.
     """
-    # TODO: implement function
-    plt.figure()
-    plt.plot(np.real(iq), label='I')
-    plt.plot(np.imag(iq), label='Q')
+    plt.figure(figsize=(10, 4))
+
+    # TODO: Plot the real (I) and imaginary (Q) parts of iq
+    # Hint: use np.real(iq) and np.imag(iq)
+    # STUDENT FILL IN BELOW
+    # plt.plot(...)
+    # plt.plot(...)
+
     plt.xlabel('Sample')
     plt.ylabel('Amplitude')
     plt.title('Time-Domain IQ')
     plt.legend()
+    plt.grid(True)
+    plt.tight_layout()
     plt.show()
 
-def plot_fft(iq, fs):
+
+def plot_fft(iq, fs, center_freq):
     """
-    Plot frequency-domain spectrum.
+    Plot frequency-domain spectrum (magnitude in dB), centered on center_freq.
     """
-    # TODO: implement FFT visualization
     N = len(iq)
-    freq_axis = np.fft.fftfreq(N, 1/fs)
-    spectrum = np.fft.fftshift(np.fft.fft(iq))
-    plt.figure()
-    plt.plot(freq_axis/1e6, 20*np.log10(np.abs(spectrum)))
+
+    # TODO: Compute FFT and shift zero frequency to center
+    # STUDENT FILL IN BELOW
+    # spectrum = ...
+
+    # TODO: Create frequency axis and shift by center_freq
+    # freq_axis = ...
+
+    # TODO: Plot magnitude in dB
+    # STUDENT FILL IN BELOW
+    # plt.plot(...)
+
     plt.xlabel('Frequency (MHz)')
     plt.ylabel('Magnitude (dB)')
     plt.title('Frequency-Domain Spectrum')
+    plt.grid(True)
+    plt.tight_layout()
     plt.show()
 
-def plot_spectrogram(iq, fs, nfft=1024, overlap=512):
+
+def plot_spectrogram(iq, fs, center_freq, nfft=1024, overlap=512):
     """
-    Plot spectrogram of IQ data.
+    Plot spectrogram of IQ data with y-axis relabeled relative to center_freq.
+    This function is fully working — no edits needed.
     """
-    # TODO: implement spectrogram
-    plt.figure()
-    plt.specgram(iq, NFFT=nfft, Fs=fs, noverlap=overlap, scale='dB')
+    plt.figure(figsize=(10, 4))
+    Pxx, freqs, bins, im = plt.specgram(
+        iq,
+        NFFT=nfft,
+        Fs=fs,
+        noverlap=overlap,
+        scale='dB',
+        mode='psd',
+        cmap='viridis'
+    )
+
+    yticks = plt.yticks()[0]
+    ytick_labels = [f"{(tick + center_freq)/1e6:.3f}" for tick in yticks]
+    plt.yticks(yticks, ytick_labels)
+
     plt.xlabel('Time (s)')
-    plt.ylabel('Frequency (Hz)')
+    plt.ylabel('Frequency (MHz)')
     plt.title('Spectrogram')
+    plt.colorbar(label='Power (dB)')
+    plt.tight_layout()
     plt.show()
+
 
 # ===== Generate plots =====
 plot_time_domain(iq_data)
-plot_fft(iq_data, FS)
-plot_spectrogram(iq_data, FS)
+plot_fft(iq_data, FS, CENTER_FREQ)
+plot_spectrogram(iq_data, FS, CENTER_FREQ)
