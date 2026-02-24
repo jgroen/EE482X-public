@@ -11,8 +11,8 @@ Instructions:
 import numpy as np
 import matplotlib.pyplot as plt
 
-INPUT_FILE = 'capture_iq.bin'
-FS = 1e6  # sample rate in Hz
+INPUT_FILE =  # file name
+FS =   # sample rate in Hz
 
 # ===== Load IQ data =====
 iq_data = np.fromfile(INPUT_FILE, dtype=np.complex64)
