@@ -13,9 +13,10 @@ import matplotlib.pyplot as plt
 
 INPUT_FILE =  # file name
 FS =   # sample rate in Hz
+DTYPE = # data type
 
 # ===== Load IQ data =====
-iq_data = np.fromfile(INPUT_FILE, dtype=np.complex64)
+iq_data = np.fromfile(INPUT_FILE, dtype=DTYPE)
 
 # ===== Implement visualization functions =====
 
