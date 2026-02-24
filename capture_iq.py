@@ -6,7 +6,7 @@ Capture IQ data from a HackRF One or USRP B205 SDR.
 Instructions:
 - Set center frequency, sample rate, gain, and capture duration.
 - Run the script to capture IQ samples.
-- Output will be saved as 'capture_iq.bin'.
+- Output will be saved as 'lab2_iq.bin'.
 """
 
 import numpy as np
@@ -16,7 +16,7 @@ CENTER_FREQ = 2.4e9   # Hz
 SAMPLE_RATE = 1e6     # Hz
 GAIN = 40             # dB
 DURATION = 5          # seconds
-OUTPUT_FILE = 'capture_iq.bin'
+OUTPUT_FILE = 'lab2_iq.bin'
 SDR_TYPE = 'HackRF'   # or 'USRP'
 # =============================
 
