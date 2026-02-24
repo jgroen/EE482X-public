@@ -9,30 +9,68 @@ Instructions:
 - Output will be saved as 'lab2_iq.bin'.
 """
 
+from python_hackrf import pyhackrf
 import numpy as np
+import time
 
-# ====== User parameters ======
-CENTER_FREQ = 2.4e9   # Hz
-SAMPLE_RATE = 1e6     # Hz
-GAIN = 40             # dB
-DURATION = 5          # seconds
-OUTPUT_FILE = 'lab2_iq.bin'
-SDR_TYPE = 'HackRF'   # or 'USRP'
-# =============================
+CENTER_FREQ = 
+SAMPLE_RATE = 
+LNA_GAIN = 
+VGA_GAIN = 
+DURATION = 
+OUTPUT_FILE = "lab2_iq.bin"
+BASEBAND_FILTER = 
 
-def capture_iq(center_freq, sample_rate, gain, duration, output_file, sdr_type):
-    """
-    Placeholder function to capture IQ samples.
-    Implement SDR capture here using PyHackRF or UHD for USRP.
-    """
-    print(f"Capturing {duration}s of IQ data at {center_freq/1e6} MHz...")
-    # Example placeholder: generate random complex samples
-        # iq_data = get_samples
-    
-    # Save to file
-    iq_data.tofile(output_file)
-    num_samples = int(sample_rate * duration)
-    print(f"Saved {num_samples} samples to {output_file}")
+def capture_iq():
+    pyhackrf.pyhackrf_init()
+    sdr = pyhackrf.pyhackrf_open()
+
+    bw = pyhackrf.pyhackrf_compute_baseband_filter_bw_round_down_lt(
+        BASEBAND_FILTER
+    )
+
+    sdr.pyhackrf_set_sample_rate(SAMPLE_RATE)
+    sdr.pyhackrf_set_baseband_filter_bandwidth(bw)
+    sdr.pyhackrf_set_freq(CENTER_FREQ)
+    sdr.pyhackrf_set_lna_gain(LNA_GAIN)
+    sdr.pyhackrf_set_vga_gain(VGA_GAIN)
+    sdr.pyhackrf_set_amp_enable(False)
+    sdr.pyhackrf_set_antenna_enable(False)
+
+    num_samples = int(DURATION * SAMPLE_RATE)
+    samples = np.zeros(num_samples, dtype=np.complex64)
+    last_idx = 0
+
+    def rx_callback(device, buffer, buffer_length, valid_length):
+        nonlocal samples, last_idx
+
+        accepted = valid_length // 2
+        remaining = len(samples) - last_idx
+        if remaining <= 0:
+            return 0
+
+        accepted = min(accepted, remaining)
+
+        iq = buffer[:2*accepted].astype(np.int8)
+        iq = iq[0::2] + 1j * iq[1::2]
+        iq /= 128.0
+
+        samples[last_idx:last_idx + accepted] = iq
+        last_idx += accepted
+        return 0
+
+    sdr.set_rx_callback(rx_callback)
+    sdr.pyhackrf_start_rx()
+    time.sleep(DURATION)
+    sdr.pyhackrf_stop_rx()
+
+    sdr.pyhackrf_close()
+    pyhackrf.pyhackrf_exit()
+
+    samples = samples[:last_idx]
+    samples.tofile(OUTPUT_FILE)
+
+    print(f"Saved {last_idx} complex samples to {OUTPUT_FILE}")
 
 if __name__ == "__main__":
-    capture_iq(CENTER_FREQ, SAMPLE_RATE, GAIN, DURATION, OUTPUT_FILE, SDR_TYPE)
+    capture_iq()
