@@ -7,11 +7,11 @@ import matplotlib.pyplot as plt
 
 N = 10000          # EDIT: try 200 (covariance breakdown)
 noise_scale = 0.05 # EDIT: try 0.2 (more noise)
-interference_scale = 0.1  # EDIT: try 5 (strong jammer)
+interference_scale = 1  # EDIT: try 5 (strong jammer)
 
 theta1_deg = 20    # signal 1
 theta2_deg = 25    # signal 2 (EDIT: try 22 for closer spacing)
-theta3_deg = -40   # interferer
+theta3_deg = 15   # interferer
 
 # ================================
 
@@ -102,4 +102,91 @@ plt.ylabel("DOA Metric (dB)")
 plt.legend()
 plt.grid()
 plt.title("MVDR vs Conventional Beamforming")
+plt.show()
+
+
+
+# ================================
+# BEAMFORMING (APPLY WEIGHTS)
+# ================================
+
+# 1. Pick look direction (strongest MVDR peak)
+theta_look = theta_scan[np.argmax(results_mvdr)]
+print("Steering to angle (deg):", theta_look * 180 / np.pi)
+
+Nr = X.shape[0]
+
+# Steering vector
+s = np.exp(2j * np.pi * d * np.arange(Nr) * np.sin(theta_look)).reshape(-1,1)
+
+# Covariance
+R = (X @ X.conj().T)/X.shape[1]
+Rinv = np.linalg.pinv(R)
+
+# ================================
+# 2. Compute Weights
+# ================================
+
+# MVDR weights
+w_mvdr = (Rinv @ s)/(s.conj().T @ Rinv @ s)
+
+# Conventional weights
+w_conv = s / Nr
+
+# ================================
+# 3. Apply Beamformers
+# ================================
+
+y_mvdr = w_mvdr.conj().T @ X
+y_conv = w_conv.conj().T @ X
+
+# Flatten for plotting
+y_mvdr = y_mvdr.flatten()
+y_conv = y_conv.flatten()
+
+# ================================
+# 4. BEAM PATTERN (ANGLE DOMAIN)
+# ================================
+
+theta_plot = np.linspace(-np.pi/2, np.pi/2, 1000)
+
+pattern_mvdr = []
+pattern_conv = []
+
+for theta in theta_plot:
+    s_theta = np.exp(2j * np.pi * d * np.arange(Nr) * np.sin(theta)).reshape(-1,1)
+
+    # Array response (beam pattern)
+    resp_mvdr = np.abs(w_mvdr.conj().T @ s_theta)**2
+    resp_conv = np.abs(w_conv.conj().T @ s_theta)**2
+
+    pattern_mvdr.append(10*np.log10(resp_mvdr.squeeze()))
+    pattern_conv.append(10*np.log10(resp_conv.squeeze()))
+
+pattern_mvdr = np.array(pattern_mvdr)
+pattern_conv = np.array(pattern_conv)
+
+# Normalize
+pattern_mvdr -= np.max(pattern_mvdr)
+pattern_conv -= np.max(pattern_conv)
+
+# ================================
+# 5. PLOT (THIS IS THE MONEY PLOT)
+# ================================
+
+plt.figure(figsize=(10,5))
+
+plt.plot(theta_plot*180/np.pi, pattern_conv, '--', label="Conventional")
+plt.plot(theta_plot*180/np.pi, pattern_mvdr, label="MVDR")
+
+# Mark true angles
+plt.axvline(theta1_deg, color='g', linestyle=':', label="Signal 1")
+plt.axvline(theta2_deg, color='g', linestyle=':')
+plt.axvline(theta3_deg, color='r', linestyle=':', label="Jammer")
+
+plt.xlabel("Angle [Degrees]")
+plt.ylabel("Array Response (dB)")
+plt.title("Beam Pattern: MVDR vs Conventional")
+plt.legend()
+plt.grid()
 plt.show()
